@@ -303,7 +303,13 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
     <div id="screen-home" class="screen active">
       <div class="page-header">
         <span class="page-title">家計簿</span>
-        <span class="page-sub" id="dash-month-label"></span>
+        <button id="backup-btn" style="height:32px;padding:0 12px;border:0.5px solid #ddd;border-radius:9px;background:#fff;font-size:12px;color:#1a1a1a;cursor:pointer;">💾 バックアップ</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <div style="flex:1;background:#E6F1FB;border:0.5px solid #b5d4f4;border-radius:10px;padding:8px 12px;font-size:12px;color:#185FA5;" id="dash-month-label"></div>
+        <label id="restore-label" style="flex:none;height:34px;padding:0 12px;border:0.5px solid #ddd;border-radius:9px;background:#fff;font-size:12px;color:#666;cursor:pointer;display:flex;align-items:center;">📂 復元
+          <input type="file" id="restore-input" accept=".json" style="display:none;">
+        </label>
       </div>
       <div id="dash-alerts"></div>
       <div class="balance-card">
@@ -1297,6 +1303,67 @@ function refreshAll(){
 /* ============================================================
    INIT
 ============================================================ */
+
+// =============================================
+// バックアップ・復元
+// =============================================
+document.getElementById('backup-btn').addEventListener('click', function(){
+  const data = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    transactions,
+    meals,
+    budgets,
+    goals,
+    nextTxId,
+    nextMealId,
+    nextBudgetId,
+    nextGoalId
+  };
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const date = new Date();
+  a.href = url;
+  a.download = `kakeibo_backup_${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(date.getDate()).padStart(2,'0')}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('restore-input').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    try {
+      const data = JSON.parse(ev.target.result);
+      if(!data.transactions || !data.meals){
+        alert('ファイルが正しくありません');
+        return;
+      }
+      if(!confirm('現在のデータをすべて復元データで上書きしますか？')){
+        e.target.value = '';
+        return;
+      }
+      transactions = data.transactions || [];
+      meals = data.meals || [];
+      budgets = data.budgets || [];
+      goals = data.goals || [];
+      nextTxId = data.nextTxId || transactions.length + 1;
+      nextMealId = data.nextMealId || meals.length + 1;
+      nextBudgetId = data.nextBudgetId || budgets.length + 1;
+      nextGoalId = data.nextGoalId || goals.length + 1;
+      persist();
+      refreshAll();
+      alert('✅ データを復元しました！');
+    } catch(err) {
+      alert('ファイルの読み込みに失敗しました');
+    }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+});
 
 // 食事削除ボタン
 document.getElementById('food-delete-btn').addEventListener('click', function(e){
