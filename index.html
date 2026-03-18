@@ -955,39 +955,97 @@ document.querySelectorAll('[data-bv]').forEach(btn=>{
    ANALYSIS
 ============================================================ */
 function renderAnalysis(){
-  const curExp=MONTHLY_HISTORY[5];
-  const totalExp=Object.values(curExp.exp).reduce((s,v)=>s+v,0);
-  // donut
+  const history=buildMonthlyHistory();
+  const cur=history[history.length-1];
+  const prev=history.length>=2?history[history.length-2]:null;
+  const totalExp=Object.values(cur.exp).reduce((s,v)=>s+v,0);
+  const totalInc=cur.inc;
+  const totalSave=totalInc-totalExp;
+  const saveRate=totalInc>0?Math.round(totalSave/totalInc*100):0;
+  const prevExp=prev?Object.values(prev.exp).reduce((s,v)=>s+v,0):0;
+  const prevInc=prev?prev.inc:0;
+
+  // サマリーカード更新
+  document.getElementById('an-exp').textContent=fmt(totalExp);
+  document.getElementById('an-inc').textContent=fmt(totalInc);
+  document.getElementById('an-save').textContent=fmt(Math.abs(totalSave));
+  document.getElementById('an-save').style.color=totalSave>=0?'#185FA5':'#E24B4A';
+  document.getElementById('an-rate').textContent=saveRate+'%';
+  if(prev&&prevExp>0){
+    const d=Math.round((totalExp-prevExp)/prevExp*100);
+    const el=document.getElementById('an-exp-chg');
+    el.textContent=(d>=0?'▲':'▼')+' 前月比 '+(d>=0?'+':'')+d+'%';
+    el.style.color=d>0?'#E24B4A':'#1D9E75';
+  } else {
+    document.getElementById('an-exp-chg').textContent='—';
+  }
+  if(prev&&prevInc>0){
+    const d=Math.round((totalInc-prevInc)/prevInc*100);
+    document.getElementById('an-inc-chg').textContent=d===0?'— 前月と同じ':(d>0?'▲':'▼')+' 前月比 '+(d>0?'+':'')+d+'%';
+  } else {
+    document.getElementById('an-inc-chg').textContent='—';
+  }
+
+  // ドーナツグラフ
   const r=46,cx=60,cy=60,sw=16,circ=2*Math.PI*r;
   let offset=0,segs='';
-  CATS_EXP.slice(0,7).forEach(cat=>{
-    const val=curExp.exp[cat.id]||0;const pct=val/totalExp;const dash=pct*circ;
-    segs+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${cat.color}" stroke-width="${sw}" stroke-dasharray="${dash.toFixed(2)} ${circ.toFixed(2)}" stroke-dashoffset="${(-offset).toFixed(2)}" transform="rotate(-90 ${cx} ${cy})"/>`;
-    offset+=dash;
-  });
+  if(totalExp>0){
+    CATS_EXP.slice(0,7).forEach(cat=>{
+      const val=cur.exp[cat.id]||0;if(!val)return;
+      const dash=val/totalExp*circ;
+      segs+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${cat.color}" stroke-width="${sw}" stroke-dasharray="${dash.toFixed(2)} ${circ.toFixed(2)}" stroke-dashoffset="${(-offset).toFixed(2)}" transform="rotate(-90 ${cx} ${cy})"/>`;
+      offset+=dash;
+    });
+  }
   document.getElementById('donut-svg').innerHTML=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#f0efe9" stroke-width="${sw}"/>${segs}<text x="${cx}" y="${cy-5}" text-anchor="middle" fill="#1a1a1a" font-size="11" font-family="sans-serif">支出</text><text x="${cx}" y="${cy+9}" text-anchor="middle" fill="#1a1a1a" font-size="10" font-family="sans-serif">${fmt(totalExp)}</text>`;
-  document.getElementById('donut-legend').innerHTML=CATS_EXP.slice(0,7).map(cat=>`<div class="legend-row"><div class="legend-dot" style="background:${cat.color}"></div><span class="legend-name">${cat.l}</span><span class="legend-pct">${Math.round((curExp.exp[cat.id]||0)/totalExp*100)}%</span></div>`).join('');
-  // top5
-  const top5=[{name:'食費（合計）',cat:'食費',ico:'🛒',bg:'#FFF8E6',amt:43500},{name:'娯楽費（合計）',cat:'娯楽',ico:'🎬',bg:'#FAEEDA',amt:32000},{name:'交通費（合計）',cat:'交通費',ico:'🚃',bg:'#E6F1FB',amt:12000},{name:'光熱費',cat:'光熱費',ico:'💡',bg:'#EEEDFE',amt:8700},{name:'医療費',cat:'医療',ico:'💊',bg:'#FBEAF0',amt:3000}];
-  document.getElementById('top5-list').innerHTML=top5.map((t,i)=>`<div class="top-item"><div class="top-rank">${i+1}</div><div class="top-icon" style="background:${t.bg}">${t.ico}</div><div style="flex:1"><div class="top-name">${t.name}</div><div class="top-cat">${t.cat}</div></div><div class="top-amt c-exp">-${fmt(t.amt)}</div></div>`).join('');
-  // stacked
-  const maxV=Math.max(...MONTHLY_HISTORY.map(m=>Object.values(m.exp).reduce((s,v)=>s+v,0)));
-  document.getElementById('stacked-chart').innerHTML=MONTHLY_HISTORY.map(m=>{
+  document.getElementById('donut-legend').innerHTML=CATS_EXP.slice(0,7).map(cat=>{
+    const val=cur.exp[cat.id]||0;
+    const pct=totalExp>0?Math.round(val/totalExp*100):0;
+    return `<div class="legend-row"><div class="legend-dot" style="background:${cat.color}"></div><span class="legend-name">${cat.l}</span><span class="legend-pct">${pct}%</span></div>`;
+  }).join('');
+
+  // TOP5（実データ）
+  const catTotals=CATS_EXP.slice(0,7).map(c=>({
+    name:c.l,cat:c.l,ico:c.i,bg:c.bg,amt:cur.exp[c.id]||0
+  })).filter(c=>c.amt>0).sort((a,b)=>b.amt-a.amt).slice(0,5);
+  document.getElementById('top5-list').innerHTML=catTotals.length
+    ?catTotals.map((t,i)=>`<div class="top-item"><div class="top-rank">${i+1}</div><div class="top-icon" style="background:${t.bg}">${t.ico}</div><div style="flex:1"><div class="top-name">${t.name}</div><div class="top-cat">${t.cat}</div></div><div class="top-amt c-exp">-${fmt(t.amt)}</div></div>`).join('')
+    :'<div class="empty-state" style="padding:20px 0;">まだ支出データがありません</div>';
+
+  // 積み上げ棒グラフ
+  const maxV=Math.max(1,...history.map(m=>Object.values(m.exp).reduce((s,v)=>s+v,0)));
+  document.getElementById('stacked-chart').innerHTML=history.map(m=>{
     const total=Object.values(m.exp).reduce((s,v)=>s+v,0);
     return `<div class="bar-chart-row"><div class="bar-month">${m.m}</div><div class="stacked-track">${CATS_EXP.slice(0,7).map(c=>`<div class="stacked-seg" style="width:${((m.exp[c.id]||0)/maxV*100).toFixed(1)}%;background:${c.color}"></div>`).join('')}</div><div class="bar-val">${fmt(total)}</div></div>`;
   }).join('');
-  // line
-  drawLineChart();
-  // heatmap
-  const daily={1:0,2:0,3:0,4:0,5:2400,6:1800,7:3200,8:0,9:680,10:8700,11:1200,12:0,13:2340,14:2000,15:1200,16:3000,17:3240,18:1380,19:0,20:4500,21:2100,22:0,23:0,24:1500,25:800,26:3200,27:0,28:2800,29:1200,30:4100,31:0};
-  const maxD=Math.max(...Object.values(daily));
+
+  // 折れ線グラフ
+  drawLineChart(history);
+
+  // ヒートマップ（当月リアルデータ）
+  const now=new Date();
+  const curYm=cur.ym;
+  const daysInMonth=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+  const firstDow=new Date(now.getFullYear(),now.getMonth(),1).getDay();
+  const daily={};
+  transactions.filter(t=>t.date.startsWith(curYm)&&t.type==='expense').forEach(t=>{
+    const d=parseInt(t.date.split('-')[2]);
+    daily[d]=(daily[d]||0)+t.amount;
+  });
+  const maxD=Math.max(1,...Object.values(daily));
   const cols=['#f0efe9','#E1F5EE','#9FE1CB','#1D9E75','#0F6E56','#04342C'];
   const dows=['日','月','火','水','木','金','土'];
   let hmHtml=dows.map(d=>`<div class="hm-dow">${d}</div>`).join('');
-  for(let i=0;i<0;i++) hmHtml+='<div></div>';
-  for(let d=1;d<=31;d++){const v=daily[d]||0;const ci=v===0?0:Math.ceil(v/maxD*5);hmHtml+=`<div class="hm-cell" style="background:${cols[ci]}" onclick="document.getElementById('heatmap-hint').textContent='3月${d}日：${v===0?'支出なし':fmt(v)}';">${d}</div>`;}
+  for(let i=0;i<firstDow;i++) hmHtml+='<div></div>';
+  for(let d=1;d<=daysInMonth;d++){
+    const v=daily[d]||0;
+    const ci=v===0?0:Math.min(5,Math.ceil(v/maxD*5));
+    const label=v===0?'支出なし':fmt(v);
+    hmHtml+=`<div class="hm-cell" style="background:${cols[ci]}" onclick="document.getElementById('heatmap-hint').textContent='${now.getMonth()+1}月${d}日：${label}'">${d}</div>`;
+  }
   document.getElementById('heatmap-grid').innerHTML=hmHtml;
 }
+
 function drawLineChart(history){if(!history)history=buildMonthlyHistory();
   const svg=document.getElementById('line-svg');
   const W=svg.parentElement.offsetWidth||340,H=140;
