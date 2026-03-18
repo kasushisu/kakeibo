@@ -524,8 +524,8 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
       <input class="form-input" id="tx-inp-memo" type="text" placeholder="任意">
     </div>
     <button class="save-btn" id="tx-save-btn">保存する</button>
-    <div class="cancel-link" onclick="closeTxModal()">キャンセル</div>
-    <div class="delete-link" id="tx-delete-btn" style="display:none" onclick="deleteTx()">この取引を削除する</div>
+    <button class="cancel-link" style="width:100%;background:none;border:none;cursor:pointer;" onclick="closeTxModal()">キャンセル</button>
+    <button class="delete-link" id="tx-delete-btn" style="display:none;width:100%;background:none;border:none;cursor:pointer;">この取引を削除する</button>
   </div>
 </div>
 
@@ -552,7 +552,7 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
       <input class="form-input" id="food-inp-memo" type="text" placeholder="任意">
     </div>
     <button class="save-btn" id="food-save-btn">保存する</button>
-    <div class="cancel-link" onclick="closeFoodModal()">キャンセル</div>
+    <button class="cancel-link" style="width:100%;background:none;border:none;cursor:pointer;" onclick="closeFoodModal()">キャンセル</button>
   </div>
 </div>
 
@@ -575,7 +575,7 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
     </div>
     <button class="save-btn" id="budget-save-btn">保存する</button>
     <div class="cancel-link" onclick="closeBudgetModal()">キャンセル</div>
-    <div class="delete-link" id="budget-delete-btn" style="display:none" onclick="deleteBudget()">この予算を削除する</div>
+    <button class="delete-link" id="budget-delete-btn" style="display:none;width:100%;background:none;border:none;cursor:pointer;">この予算を削除する</button>
   </div>
 </div>
 
@@ -602,7 +602,7 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
     </div>
     <button class="save-btn" id="goal-save-btn">保存する</button>
     <div class="cancel-link" onclick="closeGoalModal()">キャンセル</div>
-    <div class="delete-link" id="goal-delete-btn" style="display:none" onclick="deleteGoal()">この目標を削除する</div>
+    <button class="delete-link" id="goal-delete-btn" style="display:none;width:100%;background:none;border:none;cursor:pointer;">この目標を削除する</button>
   </div>
 </div>
 
@@ -672,43 +672,14 @@ const MONTHLY_HISTORY=[
 function loadData(key,def){try{const v=localStorage.getItem(key);return v?JSON.parse(v):def;}catch(e){return def;}}
 function saveData(key,val){try{localStorage.setItem(key,JSON.stringify(val));}catch(e){}}
 
-let transactions=loadData('kakeibo_tx',[
-  {id:1,type:'expense',name:'スーパーマーケット',cat:'food',amount:3240,date:'2026-03-17',memo:''},
-  {id:2,type:'expense',name:'Suicaチャージ',cat:'transport',amount:3000,date:'2026-03-16',memo:'定期更新'},
-  {id:3,type:'income',name:'給与',cat:'salary',amount:280000,date:'2026-03-15',memo:'3月分'},
-  {id:4,type:'expense',name:'ランチ',cat:'food',amount:1200,date:'2026-03-15',memo:''},
-  {id:5,type:'expense',name:'映画',cat:'entertainment',amount:2000,date:'2026-03-14',memo:''},
-  {id:6,type:'expense',name:'ドラッグストア',cat:'daily',amount:2340,date:'2026-03-13',memo:''},
-  {id:7,type:'expense',name:'電気代',cat:'utility',amount:8700,date:'2026-03-10',memo:'2月分'},
-  {id:8,type:'expense',name:'カフェ',cat:'food',amount:680,date:'2026-03-09',memo:''},
-  {id:9,type:'expense',name:'コンビニ',cat:'food',amount:430,date:'2026-03-18',memo:''},
-  {id:10,type:'expense',name:'ランチ',cat:'food',amount:950,date:'2026-03-18',memo:''},
-]);
-let meals=loadData('kakeibo_meals',[
-  {id:1,name:'トースト・スクランブルエッグ',time:'朝食',kcal:380,date:'2026-03-18',memo:''},
-  {id:2,name:'親子丼',time:'昼食',kcal:650,date:'2026-03-18',memo:'外食'},
-  {id:3,name:'味噌汁・焼き魚・ご飯',time:'夕食',kcal:580,date:'2026-03-17',memo:'自炊'},
-  {id:4,name:'おにぎり',time:'間食',kcal:180,date:'2026-03-17',memo:''},
-  {id:5,name:'カレーライス',time:'昼食',kcal:720,date:'2026-03-16',memo:''},
-  {id:6,name:'パン・コーヒー',time:'朝食',kcal:290,date:'2026-03-16',memo:''},
-]);
-let budgets=loadData('kakeibo_budgets',[
-  {id:1,cat:'food',limit:50000,alert:80},
-  {id:2,cat:'transport',limit:20000,alert:80},
-  {id:3,cat:'entertainment',limit:30000,alert:80},
-  {id:4,cat:'daily',limit:15000,alert:80},
-  {id:5,cat:'utility',limit:10000,alert:80},
-]);
-let goals=loadData('kakeibo_goals',[
-  {id:1,emoji:'✈️',name:'ヨーロッパ旅行',target:500000,saved:187000,deadline:'2026-12',monthly:30000},
-  {id:2,emoji:'💻',name:'新しいMacBook',target:248000,saved:124000,deadline:'2026-06',monthly:25000},
-  {id:3,emoji:'🏠',name:'引越し資金',target:300000,saved:300000,deadline:'2026-04',monthly:50000},
-  {id:4,emoji:'📱',name:'iPhone買い替え',target:180000,saved:54000,deadline:'2026-09',monthly:18000},
-]);
-let nextTxId=loadData('kakeibo_next_tx_id',20);
-let nextMealId=loadData('kakeibo_next_meal_id',10);
-let nextBudgetId=loadData('kakeibo_next_budget_id',10);
-let nextGoalId=loadData('kakeibo_next_goal_id',10);
+let transactions=loadData('kakeibo_tx',[]);
+let meals=loadData('kakeibo_meals',[]);
+let budgets=loadData('kakeibo_budgets',[]);
+let goals=loadData('kakeibo_goals',[]);
+let nextTxId=loadData('kakeibo_next_tx_id',1);
+let nextMealId=loadData('kakeibo_next_meal_id',1);
+let nextBudgetId=loadData('kakeibo_next_budget_id',1);
+let nextGoalId=loadData('kakeibo_next_goal_id',1);
 
 function persist(){
   saveData('kakeibo_tx',transactions);
@@ -1295,6 +1266,32 @@ function refreshAll(){
 /* ============================================================
    INIT
 ============================================================ */
+
+// 削除ボタン - イベントリスナーで確実に動作させる
+document.getElementById('tx-delete-btn').addEventListener('click', function(e){
+  e.stopPropagation();
+  if(txEditId && confirm('この取引を削除しますか？')){
+    transactions = transactions.filter(t => t.id !== txEditId);
+    persist(); closeTxModal(); refreshAll();
+  }
+});
+
+document.getElementById('budget-delete-btn').addEventListener('click', function(e){
+  e.stopPropagation();
+  if(budgetEditId && confirm('この予算を削除しますか？')){
+    budgets = budgets.filter(b => b.id !== budgetEditId);
+    persist(); closeBudgetModal(); renderBudget();
+  }
+});
+
+document.getElementById('goal-delete-btn').addEventListener('click', function(e){
+  e.stopPropagation();
+  if(goalEditId && confirm('この目標を削除しますか？')){
+    goals = goals.filter(g => g.id !== goalEditId);
+    persist(); closeGoalModal(); renderGoals();
+  }
+});
+
 renderDashboard();
 </script>
 </body>
