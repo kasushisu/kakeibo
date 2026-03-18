@@ -325,6 +325,7 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
         <div class="card-title">最近の取引</div>
         <div id="dash-tx-list"></div>
       </div>
+      <button id="dash-add-tx-btn" style="width:100%;height:48px;background:#1a1a1a;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px;"><span style="font-size:20px">+</span> 取引を追加</button>
     </div>
 
     <!-- ===== CALENDAR ===== -->
@@ -399,10 +400,10 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
         <button class="ptab" data-p="12">年間</button>
       </div>
       <div class="metric-grid">
-        <div class="metric-card"><div class="metric-label">支出</div><div class="metric-val c-exp" id="an-exp">¥211,550</div><div class="metric-change" style="color:#E24B4A">▲ 前月比 +8.2%</div></div>
-        <div class="metric-card"><div class="metric-label">収入</div><div class="metric-val c-inc" id="an-inc">¥280,000</div><div class="metric-change c-muted">— 前月と同じ</div></div>
-        <div class="metric-card"><div class="metric-label">貯蓄額</div><div class="metric-val c-blue" id="an-save">¥68,450</div><div class="metric-change" style="color:#E24B4A">▼ 前月比 -12%</div></div>
-        <div class="metric-card"><div class="metric-label">貯蓄率</div><div class="metric-val c-blue" id="an-rate">24.4%</div><div class="metric-change c-muted">目標 30%まで ▲5.6%</div></div>
+        <div class="metric-card"><div class="metric-label">支出</div><div class="metric-val c-exp" id="an-exp">¥0</div><div class="metric-change c-muted" id="an-exp-chg">—</div></div>
+        <div class="metric-card"><div class="metric-label">収入</div><div class="metric-val c-inc" id="an-inc">¥0</div><div class="metric-change c-muted" id="an-inc-chg">—</div></div>
+        <div class="metric-card"><div class="metric-label">貯蓄額</div><div class="metric-val c-blue" id="an-save">¥0</div><div class="metric-change c-muted" id="an-save-chg">—</div></div>
+        <div class="metric-card"><div class="metric-label">貯蓄率</div><div class="metric-val c-blue" id="an-rate">0%</div><div class="metric-change c-muted" id="an-rate-chg">—</div></div>
       </div>
       <div class="tabs">
         <button class="tab active" data-av="breakdown">内訳</button>
@@ -454,11 +455,7 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
       <div id="an-insights" style="display:none">
         <div class="card">
           <div class="card-title">インサイト</div>
-          <div class="insight-item"><div class="insight-icon-wrap" style="background:#FCEBEB">🎬</div><div><div class="insight-title">娯楽費が予算を超過しています</div><div class="insight-desc">今月 ¥32,000 は設定予算 ¥30,000 を超過。先月比 +¥10,000 増加。</div><span class="insight-tag tag-warn">要対応</span></div></div>
-          <div class="insight-item"><div class="insight-icon-wrap" style="background:#FFF8E6">🛒</div><div><div class="insight-title">食費が増加傾向にあります</div><div class="insight-desc">3ヶ月連続で増加中。外食を週1回減らすと月 ¥3,000〜5,000 節約できます。</div><span class="insight-tag tag-warn">注意</span></div></div>
-          <div class="insight-item"><div class="insight-icon-wrap" style="background:#E1F5EE">💡</div><div><div class="insight-title">光熱費の節約に成功</div><div class="insight-desc">今月 ¥8,700 は前月 ¥10,200 より ¥1,500 削減できました。</div><span class="insight-tag tag-good">良好</span></div></div>
-          <div class="insight-item"><div class="insight-icon-wrap" style="background:#E6F1FB">💰</div><div><div class="insight-title">貯蓄率を30%にするには</div><div class="insight-desc">目標まであと ¥15,550 の支出削減が必要。娯楽費と食費の見直しで達成可能です。</div><span class="insight-tag tag-info">提案</span></div></div>
-          <div class="insight-item"><div class="insight-icon-wrap" style="background:#F1EFE8">📅</div><div><div class="insight-title">週末の支出が平日の2.3倍</div><div class="insight-desc">週末平均 ¥5,200/日 vs 平日 ¥2,260/日。事前リストで衝動買いを減らせます。</div><span class="insight-tag tag-info">ヒント</span></div></div>
+          <div id="insights-content"><div class="empty-state" style="padding:20px 0;">取引データが増えると、ここにインサイトが表示されます</div></div>
         </div>
       </div>
     </div>
@@ -524,8 +521,8 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
       <input class="form-input" id="tx-inp-memo" type="text" placeholder="任意">
     </div>
     <button class="save-btn" id="tx-save-btn">保存する</button>
-    <div class="cancel-link" onclick="closeTxModal()">キャンセル</div>
-    <div class="delete-link" id="tx-delete-btn" style="display:none" onclick="deleteTx()">この取引を削除する</div>
+    <button class="cancel-link" style="width:100%;background:none;border:none;cursor:pointer;" onclick="closeTxModal()">キャンセル</button>
+    <button class="delete-link" id="tx-delete-btn" style="display:none;width:100%;background:none;border:none;cursor:pointer;">この取引を削除する</button>
   </div>
 </div>
 
@@ -533,7 +530,7 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
 <div class="modal-bg" id="food-modal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-title">食事を記録</div>
+    <div class="modal-title" id="food-modal-title">食事を記録</div>
     <div class="form-row"><div class="form-label">タイミング</div>
       <div class="meal-time-grid" id="meal-time-grid">
         <button class="mt-btn selected" data-t="朝食">🌅 朝食</button>
@@ -552,7 +549,8 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
       <input class="form-input" id="food-inp-memo" type="text" placeholder="任意">
     </div>
     <button class="save-btn" id="food-save-btn">保存する</button>
-    <div class="cancel-link" onclick="closeFoodModal()">キャンセル</div>
+    <button class="cancel-link" style="width:100%;background:none;border:none;cursor:pointer;" onclick="closeFoodModal()">キャンセル</button>
+    <button class="delete-link" id="food-delete-btn" style="display:none;width:100%;background:none;border:none;cursor:pointer;">この食事記録を削除する</button>
   </div>
 </div>
 
@@ -575,7 +573,7 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
     </div>
     <button class="save-btn" id="budget-save-btn">保存する</button>
     <div class="cancel-link" onclick="closeBudgetModal()">キャンセル</div>
-    <div class="delete-link" id="budget-delete-btn" style="display:none" onclick="deleteBudget()">この予算を削除する</div>
+    <button class="delete-link" id="budget-delete-btn" style="display:none;width:100%;background:none;border:none;cursor:pointer;">この予算を削除する</button>
   </div>
 </div>
 
@@ -602,7 +600,7 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
     </div>
     <button class="save-btn" id="goal-save-btn">保存する</button>
     <div class="cancel-link" onclick="closeGoalModal()">キャンセル</div>
-    <div class="delete-link" id="goal-delete-btn" style="display:none" onclick="deleteGoal()">この目標を削除する</div>
+    <button class="delete-link" id="goal-delete-btn" style="display:none;width:100%;background:none;border:none;cursor:pointer;">この目標を削除する</button>
   </div>
 </div>
 
@@ -659,56 +657,35 @@ const TIME_COLORS={朝食:'badge-morning',昼食:'badge-lunch',夕食:'badge-din
 const EMOJIS=['🏖','✈️','🏠','🚗','💻','📱','👜','🎓','💍','🎸','🏋','🌏','🐱','👶','🏥','🎯'];
 const MOTIVATIONS=['今日も一歩、夢に近づこう ✨','小さな積み立てが大きな未来をつくる 💪','目標があるから、毎日が輝く 🌟','コツコツが最強の戦略です 🎯'];
 
-const MONTHLY_HISTORY=[
-  {m:'10月',exp:{food:35000,transport:9500,entertainment:18000,daily:6500,utility:11000,health:2000,clothing:8000},inc:280000},
-  {m:'11月',exp:{food:37000,transport:10200,entertainment:20000,daily:7200,utility:10500,health:0,clothing:12000},inc:280000},
-  {m:'12月',exp:{food:42000,transport:11000,entertainment:35000,daily:9000,utility:10800,health:1500,clothing:15000},inc:310000},
-  {m:'1月',exp:{food:38000,transport:9800,entertainment:22000,daily:7000,utility:9500,health:4000,clothing:3000},inc:280000},
-  {m:'2月',exp:{food:41000,transport:13500,entertainment:28000,daily:9200,utility:10200,health:2500,clothing:0},inc:280000},
-  {m:'3月',exp:{food:43500,transport:12000,entertainment:32000,daily:8500,utility:8700,health:3000,clothing:5200},inc:280000},
-];
+// 月別履歴はリアルデータから動的に生成
+function buildMonthlyHistory(){
+  const months=[];
+  const now=new Date();
+  for(let i=5;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    const ym=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    const label=(d.getMonth()+1)+'月';
+    const mtxs=transactions.filter(t=>t.date.startsWith(ym));
+    const exp={};
+    CATS_EXP.forEach(c=>{ exp[c.id]=mtxs.filter(t=>t.type==='expense'&&t.cat===c.id).reduce((s,t)=>s+t.amount,0); });
+    const inc=mtxs.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+    months.push({m:label,ym,exp,inc});
+  }
+  return months;
+}
 
 // Storage helpers
 function loadData(key,def){try{const v=localStorage.getItem(key);return v?JSON.parse(v):def;}catch(e){return def;}}
 function saveData(key,val){try{localStorage.setItem(key,JSON.stringify(val));}catch(e){}}
 
-let transactions=loadData('kakeibo_tx',[
-  {id:1,type:'expense',name:'スーパーマーケット',cat:'food',amount:3240,date:'2026-03-17',memo:''},
-  {id:2,type:'expense',name:'Suicaチャージ',cat:'transport',amount:3000,date:'2026-03-16',memo:'定期更新'},
-  {id:3,type:'income',name:'給与',cat:'salary',amount:280000,date:'2026-03-15',memo:'3月分'},
-  {id:4,type:'expense',name:'ランチ',cat:'food',amount:1200,date:'2026-03-15',memo:''},
-  {id:5,type:'expense',name:'映画',cat:'entertainment',amount:2000,date:'2026-03-14',memo:''},
-  {id:6,type:'expense',name:'ドラッグストア',cat:'daily',amount:2340,date:'2026-03-13',memo:''},
-  {id:7,type:'expense',name:'電気代',cat:'utility',amount:8700,date:'2026-03-10',memo:'2月分'},
-  {id:8,type:'expense',name:'カフェ',cat:'food',amount:680,date:'2026-03-09',memo:''},
-  {id:9,type:'expense',name:'コンビニ',cat:'food',amount:430,date:'2026-03-18',memo:''},
-  {id:10,type:'expense',name:'ランチ',cat:'food',amount:950,date:'2026-03-18',memo:''},
-]);
-let meals=loadData('kakeibo_meals',[
-  {id:1,name:'トースト・スクランブルエッグ',time:'朝食',kcal:380,date:'2026-03-18',memo:''},
-  {id:2,name:'親子丼',time:'昼食',kcal:650,date:'2026-03-18',memo:'外食'},
-  {id:3,name:'味噌汁・焼き魚・ご飯',time:'夕食',kcal:580,date:'2026-03-17',memo:'自炊'},
-  {id:4,name:'おにぎり',time:'間食',kcal:180,date:'2026-03-17',memo:''},
-  {id:5,name:'カレーライス',time:'昼食',kcal:720,date:'2026-03-16',memo:''},
-  {id:6,name:'パン・コーヒー',time:'朝食',kcal:290,date:'2026-03-16',memo:''},
-]);
-let budgets=loadData('kakeibo_budgets',[
-  {id:1,cat:'food',limit:50000,alert:80},
-  {id:2,cat:'transport',limit:20000,alert:80},
-  {id:3,cat:'entertainment',limit:30000,alert:80},
-  {id:4,cat:'daily',limit:15000,alert:80},
-  {id:5,cat:'utility',limit:10000,alert:80},
-]);
-let goals=loadData('kakeibo_goals',[
-  {id:1,emoji:'✈️',name:'ヨーロッパ旅行',target:500000,saved:187000,deadline:'2026-12',monthly:30000},
-  {id:2,emoji:'💻',name:'新しいMacBook',target:248000,saved:124000,deadline:'2026-06',monthly:25000},
-  {id:3,emoji:'🏠',name:'引越し資金',target:300000,saved:300000,deadline:'2026-04',monthly:50000},
-  {id:4,emoji:'📱',name:'iPhone買い替え',target:180000,saved:54000,deadline:'2026-09',monthly:18000},
-]);
-let nextTxId=loadData('kakeibo_next_tx_id',20);
-let nextMealId=loadData('kakeibo_next_meal_id',10);
-let nextBudgetId=loadData('kakeibo_next_budget_id',10);
-let nextGoalId=loadData('kakeibo_next_goal_id',10);
+let transactions=loadData('kakeibo_tx',[]);
+let meals=loadData('kakeibo_meals',[]);
+let budgets=loadData('kakeibo_budgets',[]);
+let goals=loadData('kakeibo_goals',[]);
+let nextTxId=loadData('kakeibo_next_tx_id',1);
+let nextMealId=loadData('kakeibo_next_meal_id',1);
+let nextBudgetId=loadData('kakeibo_next_budget_id',1);
+let nextGoalId=loadData('kakeibo_next_goal_id',1);
 
 function persist(){
   saveData('kakeibo_tx',transactions);
@@ -863,18 +840,18 @@ function renderDayPanel(){
   const txs=getDayTx(selDate),mls=getDayMeals(selDate);
   let html='';
   if(txs.length){
-    html+='<div class="section-label" style="margin-bottom:6px;">収支</div>';
+    html+='<div class="section-label" style="margin-bottom:6px;">収支 <span style="font-size:10px;color:#aaa;">（タップで編集）</span></div>';
     txs.forEach(tx=>{
       const cat=getCat(tx.type,tx.cat);
-      html+=`<div class="tx-item" onclick="openTxEdit(${tx.id})"><div class="tx-ico" style="background:${cat.bg}">${cat.i}</div><div class="tx-body"><div class="tx-name">${tx.name}</div></div><div class="tx-amt ${tx.type==='expense'?'c-exp':'c-inc'}">${tx.type==='expense'?'-':'+'}${fmt(tx.amount)}</div></div>`;
+      html+=`<div class="tx-item" onclick="openTxEdit(${tx.id})"><div class="tx-ico" style="background:${cat.bg}">${cat.i}</div><div class="tx-body"><div class="tx-name">${tx.name}</div></div><div class="tx-amt ${tx.type==='expense'?'c-exp':'c-inc'}">${tx.type==='expense'?'-':'+'}${fmt(tx.amount)}</div><div style="font-size:18px;color:#ccc;padding-left:4px;">›</div></div>`;
     });
   }
   if(mls.length){
     const totalCal=mls.reduce((s,m)=>s+m.kcal,0);
-    html+='<div class="section-label" style="margin-top:10px;margin-bottom:6px;">食事</div>';
+    html+='<div class="section-label" style="margin-top:10px;margin-bottom:6px;">食事 <span style="font-size:10px;color:#aaa;">（タップで編集）</span></div>';
     ['朝食','昼食','夕食','間食'].forEach(t=>{
       mls.filter(m=>m.time===t).forEach(ml=>{
-        html+=`<div class="meal-row"><span class="meal-time-badge ${TIME_COLORS[ml.time]||'badge-snack'}">${ml.time}</span><span class="meal-name">${ml.name}</span><span class="meal-cal">${ml.kcal} kcal</span></div>`;
+        html+=`<div class="meal-row" style="cursor:pointer;" onclick="openFoodEdit(${ml.id})"><span class="meal-time-badge ${TIME_COLORS[ml.time]||'badge-snack'}">${ml.time}</span><span class="meal-name">${ml.name}</span><span class="meal-cal">${ml.kcal} kcal</span><span style="font-size:18px;color:#ccc;padding-left:4px;">›</span></div>`;
       });
     });
     html+=`<div class="day-cal-total">合計 ${totalCal} kcal</div>`;
@@ -1005,19 +982,19 @@ function renderAnalysis(){
   for(let d=1;d<=31;d++){const v=daily[d]||0;const ci=v===0?0:Math.ceil(v/maxD*5);hmHtml+=`<div class="hm-cell" style="background:${cols[ci]}" onclick="document.getElementById('heatmap-hint').textContent='3月${d}日：${v===0?'支出なし':fmt(v)}';">${d}</div>`;}
   document.getElementById('heatmap-grid').innerHTML=hmHtml;
 }
-function drawLineChart(){
+function drawLineChart(history){if(!history)history=buildMonthlyHistory();
   const svg=document.getElementById('line-svg');
   const W=svg.parentElement.offsetWidth||340,H=140;
   svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
-  const pad={t:14,b:24,l:42,r:12};const cw=W-pad.l-pad.r,ch=H-pad.t-pad.b,n=MONTHLY_HISTORY.length;
-  const incV=MONTHLY_HISTORY.map(m=>m.inc);
-  const expV=MONTHLY_HISTORY.map(m=>Object.values(m.exp).reduce((s,v)=>s+v,0));
-  const savV=MONTHLY_HISTORY.map((m,i)=>incV[i]-expV[i]);
-  const all=[...incV,...expV,...savV];const minV=Math.min(...all)*0.9,maxV=Math.max(...all)*1.05;
-  const xp=i=>pad.l+i*(cw/(n-1));const yp=v=>pad.t+ch-(v-minV)/(maxV-minV)*ch;
-  const line=(vals,color)=>`<path d="${vals.map((v,i)=>`${i===0?'M':'L'}${xp(i).toFixed(1)},${yp(v).toFixed(1)}`).join(' ')}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round"/>`;
+  const pad={t:14,b:24,l:42,r:12};const cw=W-pad.l-pad.r,ch=H-pad.t-pad.b,n=history.length;
+  const incV=history.map(m=>m.inc);
+  const expV=history.map(m=>Object.values(m.exp).reduce((s,v)=>s+v,0));
+  const savV=history.map((m,i)=>incV[i]-expV[i]);
+  const all=[...incV,...expV,...savV];const minV=Math.min(0,...all),maxV=Math.max(1,...all)*1.1;
+  const xp=i=>n>1?pad.l+i*(cw/(n-1)):pad.l+cw/2;const yp=v=>pad.t+ch-(v-minV)/(maxV-minV)*ch;
+  const line=(vals,color)=>n<2?'':`<path d="${vals.map((v,i)=>`${i===0?'M':'L'}${xp(i).toFixed(1)},${yp(v).toFixed(1)}`).join(' ')}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round"/>`;
   const dots=(vals,color)=>vals.map((v,i)=>`<circle cx="${xp(i).toFixed(1)}" cy="${yp(v).toFixed(1)}" r="3" fill="${color}"/>`).join('');
-  const labels=MONTHLY_HISTORY.map((m,i)=>`<text x="${xp(i).toFixed(1)}" y="${H-5}" text-anchor="middle" fill="#bbb" font-size="10" font-family="sans-serif">${m.m}</text>`).join('');
+  const labels=history.map((m,i)=>`<text x="${xp(i).toFixed(1)}" y="${H-5}" text-anchor="middle" fill="#bbb" font-size="10" font-family="sans-serif">${m.m}</text>`).join('');
   const yLabels=[minV,maxV].map(v=>`<text x="${pad.l-4}" y="${yp(v).toFixed(1)}" text-anchor="end" dominant-baseline="middle" fill="#bbb" font-size="9" font-family="sans-serif">${(v/10000).toFixed(0)}万</text>`).join('');
   svg.innerHTML=line(incV,'#1D9E75')+line(expV,'#E24B4A')+line(savV,'#185FA5')+dots(incV,'#1D9E75')+dots(expV,'#E24B4A')+dots(savV,'#185FA5')+labels+yLabels+`<text x="${W-4}" y="20" text-anchor="end" fill="#1D9E75" font-size="10" font-family="sans-serif">収入</text><text x="${W-4}" y="32" text-anchor="end" fill="#E24B4A" font-size="10" font-family="sans-serif">支出</text><text x="${W-4}" y="44" text-anchor="end" fill="#185FA5" font-size="10" font-family="sans-serif">貯蓄</text>`;
 }
@@ -1054,12 +1031,16 @@ function renderGoals(){
   document.getElementById('goals-list').innerHTML=sorted.map(g=>{
     const pct=getPct(g.saved,g.target),status=goalStatus(g),isDone=status==='done';
     const ml=Math.max(0,(new Date(g.deadline+'-01').getFullYear()-today.getFullYear())*12+(new Date(g.deadline+'-01').getMonth()-today.getMonth()));
-    return `<div class="goal-card${isDone?' completed':''}" onclick="openDeposit(${g.id})">
+    return `<div class="goal-card${isDone?' completed':''}">
       <div class="gc-top"><div class="gc-emoji" style="background:${isDone?'#E1F5EE':'#f0efe9'}">${g.emoji}</div>
       <div class="gc-info"><div class="gc-name">${g.name}</div><div class="gc-deadline">${isDone?'達成済み 🎉':`期限：${g.deadline.replace('-','年')}月 · 残り${ml}ヶ月`}</div></div>
       <div class="gc-right"><div class="gc-pct" style="color:${goalBarColor(status)}">${pct}%</div>${goalBadge(status)}</div></div>
       <div class="gc-bar-track"><div class="gc-bar-fill" style="width:${pct}%;background:${goalBarColor(status)}"></div></div>
       <div class="gc-amounts"><span class="gc-saved">${fmt(g.saved)}</span><span class="gc-target">/ ${fmt(g.target)}</span>${!isDone?`<span class="gc-monthly-tag">月 ${fmt(g.monthly)}</span>`:'<span class="gc-monthly-tag" style="background:#E1F5EE;color:#0F6E56;">完了</span>'}</div>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        ${!isDone?`<button onclick="openDeposit(${g.id})" style="flex:1;height:36px;background:#1a1a1a;color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:500;cursor:pointer;">💰 積み立てる</button>`:''}
+        <button onclick="openGoalEdit(${g.id})" style="flex:1;height:36px;background:#fff;color:#1a1a1a;border:0.5px solid #ddd;border-radius:9px;font-size:13px;cursor:pointer;">✏️ 編集・削除</button>
+      </div>
     </div>`;
   }).join('')||'<div class="empty-state">目標を追加してみましょう</div>';
   // milestones
@@ -1130,15 +1111,31 @@ function deleteTx(){if(txEditId){transactions=transactions.filter(t=>t.id!==txEd
    FOOD MODAL
 ============================================================ */
 let selMealTime='朝食';
+let foodEditId=null;
 function openFoodModal(){
+  foodEditId=null;
   selMealTime='朝食';
+  document.getElementById('food-modal-title').textContent='食事を記録';
   document.querySelectorAll('.mt-btn').forEach(b=>b.classList.toggle('selected',b.dataset.t==='朝食'));
   document.getElementById('food-inp-name').value='';
   document.getElementById('food-inp-cal').value='';
   document.getElementById('food-inp-memo').value='';
+  document.getElementById('food-delete-btn').style.display='none';
   document.getElementById('food-modal').classList.add('open');
 }
-function closeFoodModal(){document.getElementById('food-modal').classList.remove('open');}
+function openFoodEdit(id){
+  const ml=meals.find(m=>m.id===id);if(!ml)return;
+  foodEditId=id;
+  selMealTime=ml.time;
+  document.getElementById('food-modal-title').textContent='食事を編集';
+  document.querySelectorAll('.mt-btn').forEach(b=>b.classList.toggle('selected',b.dataset.t===ml.time));
+  document.getElementById('food-inp-name').value=ml.name;
+  document.getElementById('food-inp-cal').value=ml.kcal;
+  document.getElementById('food-inp-memo').value=ml.memo||'';
+  document.getElementById('food-delete-btn').style.display='block';
+  document.getElementById('food-modal').classList.add('open');
+}
+function closeFoodModal(){document.getElementById('food-modal').classList.remove('open');foodEditId=null;}
 document.querySelectorAll('.mt-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{selMealTime=btn.dataset.t;document.querySelectorAll('.mt-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');});
 });
@@ -1147,7 +1144,12 @@ document.getElementById('food-save-btn').addEventListener('click',()=>{
   const kcal=parseInt(document.getElementById('food-inp-cal').value)||0;
   const memo=document.getElementById('food-inp-memo').value.trim();
   if(!name){alert('料理名を入力してください');return;}
-  meals.push({id:nextMealId++,name,time:selMealTime,kcal,date:selDate,memo});
+  if(foodEditId){
+    const ml=meals.find(m=>m.id===foodEditId);
+    if(ml) Object.assign(ml,{name,time:selMealTime,kcal,memo});
+  } else {
+    meals.push({id:nextMealId++,name,time:selMealTime,kcal,date:selDate,memo});
+  }
   persist();closeFoodModal();refreshAll();
 });
 
@@ -1295,6 +1297,46 @@ function refreshAll(){
 /* ============================================================
    INIT
 ============================================================ */
+
+// 食事削除ボタン
+document.getElementById('food-delete-btn').addEventListener('click', function(e){
+  e.stopPropagation();
+  if(foodEditId && confirm('この食事記録を削除しますか？')){
+    meals = meals.filter(m => m.id !== foodEditId);
+    persist(); closeFoodModal(); refreshAll();
+  }
+});
+
+// ホーム画面の取引追加ボタン
+document.getElementById('dash-add-tx-btn').addEventListener('click', function(){
+  openTxModal(todayStr);
+});
+
+// 削除ボタン - イベントリスナーで確実に動作させる
+document.getElementById('tx-delete-btn').addEventListener('click', function(e){
+  e.stopPropagation();
+  if(txEditId && confirm('この取引を削除しますか？')){
+    transactions = transactions.filter(t => t.id !== txEditId);
+    persist(); closeTxModal(); refreshAll();
+  }
+});
+
+document.getElementById('budget-delete-btn').addEventListener('click', function(e){
+  e.stopPropagation();
+  if(budgetEditId && confirm('この予算を削除しますか？')){
+    budgets = budgets.filter(b => b.id !== budgetEditId);
+    persist(); closeBudgetModal(); renderBudget();
+  }
+});
+
+document.getElementById('goal-delete-btn').addEventListener('click', function(e){
+  e.stopPropagation();
+  if(goalEditId && confirm('この目標を削除しますか？')){
+    goals = goals.filter(g => g.id !== goalEditId);
+    persist(); closeGoalModal(); renderGoals();
+  }
+});
+
 renderDashboard();
 </script>
 </body>
